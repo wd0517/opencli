@@ -3,31 +3,53 @@
 > **Make any website your CLI.**  
 > Zero risk · Reuse Chrome login · AI-powered discovery
 
+[中文文档](./README.zh-CN.md)
+
+[![npm](https://img.shields.io/npm/v/@jackwener/opencli)](https://www.npmjs.com/package/@jackwener/opencli)
+
 OpenCLI turns any website into a command-line tool by bridging your Chrome browser through [Playwright MCP](https://github.com/nichochar/playwright-mcp). No passwords stored, no tokens leaked — it just rides your existing browser session.
 
 ## ✨ Highlights
 
-- 🌐 **25+ commands, 13 sites** — Bilibili, 知乎, GitHub, Twitter/X, Reddit, V2EX, 小红书, Hacker News…
+- 🌐 **25+ commands, 13 sites** — Bilibili, Zhihu, GitHub, Twitter/X, Reddit, V2EX, Xiaohongshu, Hacker News…
 - 🔐 **Account-safe** — Reuses Chrome's logged-in state; your credentials never leave the browser
-- 🤖 **AI Agent ready** — `explore` discovers APIs, `synthesize` generates adapters, `cascade` finds the simplest auth strategy
+- 🤖 **AI Agent ready** — `explore` discovers APIs, `synthesize` generates adapters, `cascade` finds auth strategies
 - 📝 **Declarative YAML** — Most adapters are ~30 lines of YAML pipeline
-- 🔌 **TypeScript escape hatch** — Complex adapters (XHR interception, GraphQL) can be written in TS
+- 🔌 **TypeScript escape hatch** — Complex adapters (XHR interception, GraphQL) in TS
 
 ## 🚀 Quick Start
 
+### Install via npm (recommended)
+
 ```bash
-npm install
-npx tsx src/main.ts list               # See all commands
+npm install -g @jackwener/opencli
+```
 
-# Public APIs (no browser required)
-npx tsx src/main.ts hackernews top --limit 5
-npx tsx src/main.ts github search --keyword "rust"
-npx tsx src/main.ts v2ex hot --limit 10
+Then use directly:
 
-# Browser commands (Chrome + MCP Bridge extension required)
-npx tsx src/main.ts bilibili hot --limit 5
-npx tsx src/main.ts zhihu hot --limit 5
-npx tsx src/main.ts bilibili search --keyword "AI" --limit 5
+```bash
+opencli list                              # See all commands
+opencli hackernews top --limit 5          # Public API, no browser
+opencli bilibili hot --limit 5            # Browser command
+opencli zhihu hot -f json                 # JSON output
+```
+
+### Install from source
+
+```bash
+git clone git@github.com:jackwener/opencli.git
+cd opencli && npm install
+npx tsx src/main.ts list
+```
+
+### Update
+
+```bash
+# npm global
+npm update -g @jackwener/opencli
+
+# Or reinstall to latest
+npm install -g @jackwener/opencli@latest
 ```
 
 ## 📋 Prerequisites
@@ -35,9 +57,9 @@ npx tsx src/main.ts bilibili search --keyword "AI" --limit 5
 Browser commands need:
 1. **Chrome** running with the target site logged in
 2. **[Playwright MCP Bridge](https://chromewebstore.google.com/detail/playwright-mcp-bridge/mmlmfjhmonkocbjadbfplnigmagldckm)** extension installed
-3. Click the extension icon to approve connection on first use
+3. Click the extension icon to approve connection (or set `PLAYWRIGHT_MCP_EXTENSION_TOKEN` to auto-approve)
 
-> 💡 Set `PLAYWRIGHT_MCP_EXTENSION_TOKEN` to auto-approve without clicking.
+Public API commands (`hackernews`, `github search`, `v2ex`) need no browser at all.
 
 ## 📦 Built-in Commands
 
@@ -68,7 +90,7 @@ opencli bilibili hot -v         # Verbose: show pipeline steps
 # 1. Deep Explore — discover APIs, infer capabilities, detect framework
 opencli explore https://example.com --site mysite
 
-# 2. Synthesize — generate candidate YAML adapters from explore artifacts
+# 2. Synthesize — generate YAML adapters from explore artifacts
 opencli synthesize mysite
 
 # 3. Generate — one-shot: explore → synthesize → register
@@ -78,7 +100,7 @@ opencli generate https://example.com --goal "hot"
 opencli cascade https://api.example.com/data
 ```
 
-Explore outputs structured artifacts to `.opencli/explore/<site>/`:
+Explore outputs to `.opencli/explore/<site>/`:
 - `manifest.json` — site metadata, framework detection
 - `endpoints.json` — scored API endpoints with response schemas
 - `capabilities.json` — inferred capabilities with confidence scores
@@ -86,9 +108,21 @@ Explore outputs structured artifacts to `.opencli/explore/<site>/`:
 
 ## 🔧 Create New Commands
 
-See **[SKILL.md](./SKILL.md)** for the full adapter development guide:
-- **YAML pipeline** — declare navigate → evaluate → map → limit
-- **TypeScript adapter** — for XHR interception, GraphQL, pagination
+See **[SKILL.md](./SKILL.md)** for the full adapter guide (YAML pipeline + TypeScript).
+
+## Releasing New Versions
+
+```bash
+# Bump version
+npm version patch   # 0.1.0 → 0.1.1
+npm version minor   # 0.1.0 → 0.2.0
+npm version major   # 0.1.0 → 1.0.0
+
+# Push tag to trigger GitHub Actions auto-release
+git push --follow-tags
+```
+
+The CI will automatically build, create a GitHub release, and publish to npm.
 
 ## 📄 License
 
