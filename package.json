@@ -1,5 +1,5 @@
 {
-  "name": "@jackwener/opencli",
+  "name": "@wd0517/opencli",
   "version": "0.2.0",
   "publishConfig": {
     "access": "public"
@@ -29,11 +29,11 @@
     "ai",
     "playwright"
   ],
-  "author": "jackwener",
+  "author": "wd0517",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jackwener/opencli.git"
+    "url": "git+https://github.com/wd0517/opencli.git"
   },
   "dependencies": {
     "chalk": "^5.3.0",
