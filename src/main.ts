@@ -7,7 +7,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import chalk from 'chalk';
 import { discoverClis, executeCommand } from './engine.js';
 import { type CliCommand, fullName, getRegistry, strategyLabel } from './registry.js';
@@ -86,6 +86,13 @@ for (const [, cmd] of registry) {
 
   for (const arg of cmd.args) {
     const flag = arg.required ? `--${arg.name} <value>` : `--${arg.name} [value]`;
+    if (arg.multiple) {
+      const option = new Option(flag, arg.help ?? '')
+        .argParser((value, previous: string[] = []) => [...previous, value]);
+      if (arg.default != null) option.default(Array.isArray(arg.default) ? arg.default : [String(arg.default)]);
+      subCmd.addOption(option);
+      continue;
+    }
     if (arg.required) subCmd.requiredOption(flag, arg.help ?? '');
     else if (arg.default != null) subCmd.option(flag, arg.help ?? '', String(arg.default));
     else subCmd.option(flag, arg.help ?? '');
@@ -102,7 +109,11 @@ for (const [, cmd] of registry) {
     try {
       let result: any;
       if (cmd.browser) {
-        result = await browserSession(PlaywrightMCP, async (page) => runWithTimeout(executeCommand(cmd, page, kwargs, actionOpts.verbose), { timeout: cmd.timeoutSeconds ?? DEFAULT_BROWSER_COMMAND_TIMEOUT, label: fullName(cmd) }));
+        result = await browserSession(
+          PlaywrightMCP,
+          async (page) => runWithTimeout(executeCommand(cmd, page, kwargs, actionOpts.verbose), { timeout: cmd.timeoutSeconds ?? DEFAULT_BROWSER_COMMAND_TIMEOUT, label: fullName(cmd) }),
+          { preserveTabs: kwargs.keep_open === true },
+        );
       } else { result = await executeCommand(cmd, null, kwargs, actionOpts.verbose); }
       renderOutput(result, { fmt: actionOpts.format, columns: cmd.columns, title: `${cmd.site}/${cmd.name}`, elapsed: (Date.now() - startTime) / 1000, source: fullName(cmd) });
     } catch (err: any) { console.error(chalk.red(`Error: ${err.message ?? err}`)); process.exitCode = 1; }
@@ -110,6 +121,7 @@ for (const [, cmd] of registry) {
 }
 
 function coerce(v: any, t: string): any {
+  if (Array.isArray(v)) return v.map((item) => coerce(item, t));
   if (t === 'bool') return ['1', 'true', 'yes', 'on'].includes(String(v).toLowerCase());
   if (t === 'int') return parseInt(String(v), 10);
   if (t === 'float') return parseFloat(String(v));

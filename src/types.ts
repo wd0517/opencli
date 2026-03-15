@@ -8,8 +8,10 @@
 export interface IPage {
   goto(url: string): Promise<void>;
   evaluate(js: string): Promise<any>;
+  runCode(code: string): Promise<any>;
   snapshot(opts?: { interactive?: boolean; compact?: boolean; maxDepth?: number; raw?: boolean }): Promise<any>;
   click(ref: string): Promise<void>;
+  fileUpload(paths: string[]): Promise<void>;
   typeText(ref: string, text: string): Promise<void>;
   pressKey(key: string): Promise<void>;
   wait(seconds: number): Promise<void>;

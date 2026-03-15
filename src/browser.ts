@@ -72,6 +72,10 @@ export class Page implements IPage {
     return this.call('tools/call', { name: 'browser_evaluate', arguments: { function: normalized } });
   }
 
+  async runCode(code: string): Promise<any> {
+    return this.call('tools/call', { name: 'browser_run_code', arguments: { code } });
+  }
+
   private normalizeEval(source: string): string {
     const s = source.trim();
     if (!s) return '() => undefined';
@@ -94,6 +98,10 @@ export class Page implements IPage {
 
   async click(ref: string): Promise<void> {
     await this.call('tools/call', { name: 'browser_click', arguments: { element: 'click target', ref } });
+  }
+
+  async fileUpload(paths: string[]): Promise<void> {
+    await this.call('tools/call', { name: 'browser_file_upload', arguments: { paths } });
   }
 
   async typeText(ref: string, text: string): Promise<void> {
@@ -218,10 +226,10 @@ export class PlaywrightMCP {
     });
   }
 
-  async close(): Promise<void> {
+  async close(opts: { preserveTabs?: boolean } = {}): Promise<void> {
     try {
       // Close tabs opened during this session (site tabs + extension tabs)
-      if (this._page && this._proc && !this._proc.killed) {
+      if (!opts.preserveTabs && this._page && this._proc && !this._proc.killed) {
         try {
           const tabs = await this._page.tabs();
           const tabStr = typeof tabs === 'string' ? tabs : JSON.stringify(tabs);

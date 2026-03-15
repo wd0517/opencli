@@ -27,12 +27,13 @@ export async function runWithTimeout<T>(
 export async function browserSession<T>(
   BrowserFactory: new () => any,
   fn: (page: IPage) => Promise<T>,
+  opts: { preserveTabs?: boolean } = {},
 ): Promise<T> {
   const mcp = new BrowserFactory();
   try {
     const page = await mcp.connect({ timeout: DEFAULT_BROWSER_CONNECT_TIMEOUT });
     return await fn(page);
   } finally {
-    await mcp.close().catch(() => {});
+    await mcp.close({ preserveTabs: opts.preserveTabs }).catch(() => {});
   }
 }

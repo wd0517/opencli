@@ -44,3 +44,6 @@ import './ctrip/search.js';
 
 // youtube
 import './youtube/search.js';
+
+// jimeng
+import './jimeng/seedance.js';

@@ -19,6 +19,7 @@ export interface Arg {
   required?: boolean;
   help?: string;
   choices?: string[];
+  multiple?: boolean;
 }
 
 export interface CliCommand {
